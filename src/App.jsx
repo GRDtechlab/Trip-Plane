@@ -1,11 +1,11 @@
 import './App.css'
+import Hero from './components/custom/Hero'
 import { Button } from './components/ui/button'
 
 function App() {
   return (
     <>
-      <h1>Welcome!</h1>   
-      <Button> Hello</Button>  
+    <Hero/>
     </>
   )
 }
