@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SelectBudgetOptions, SelectTravelsList } from "@/constants/options";
+import {
+  AI_PROMPT,
+  SelectBudgetOptions,
+  SelectTravelsList,
+} from "@/constants/options";
+import { chatSession } from "@/service/AIModal";
 import React, { useEffect } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { useForm, Controller } from "react-hook-form";
@@ -24,8 +29,19 @@ function CreateTrip() {
     progressive: true,
   }); // HEre mode is used to fire validation onInput change value.
 
-  const onSubmit = (tripFormData) => {
+  const onSubmit = async (tripFormData) => {
     console.log(!isValid, { tripFormData });
+    const FINAL_PROMPTS = AI_PROMPT.replace(
+      "{favouriteDestination}",
+      tripFormData.favouriteDestination
+    )
+      .replace("{totalDays}", tripFormData.totalDays)
+      .replace("{budget}", tripFormData.budget)
+      .replace("{travellers}", tripFormData.travellers);
+
+    console.log(FINAL_PROMPTS);
+    const result = await chatSession.sendMessage(FINAL_PROMPTS);
+    console.log(result?.response?.text());
   };
 
   useEffect(() => {
