@@ -1,3 +1,4 @@
+import HeaderSeperatorImg from "@/components/custom/Header-Seperator-Img";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -6,9 +7,10 @@ import {
   SelectTravelsList,
 } from "@/constants/options";
 import { chatSession } from "@/service/AIModal";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { useForm, Controller } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 function CreateTrip() {
   const {
@@ -29,8 +31,12 @@ function CreateTrip() {
     progressive: true,
   }); // HEre mode is used to fire validation onInput change value.
 
+  const navigate = useNavigate();
+  const [isSending, setSending] = useState(false);
+
   const onSubmit = async (tripFormData) => {
     console.log(!isValid, { tripFormData });
+    setSending(true);
     const FINAL_PROMPTS = AI_PROMPT.replace(
       "{favouriteDestination}",
       tripFormData.favouriteDestination
@@ -41,18 +47,28 @@ function CreateTrip() {
 
     console.log(FINAL_PROMPTS);
     const result = await chatSession.sendMessage(FINAL_PROMPTS);
+
     console.log(result?.response?.text());
+    setSending(false);
+    navigate(`/view-trip/${tripFormData.favouriteDestination}`, {
+      state: {
+        tripData: JSON.parse(result.response.text()),
+        userSelection: tripFormData,
+      },
+    });
   };
 
   useEffect(() => {
     // This is recomended way to reset forms in react-hook-form
-    if (isSubmitSuccessful)
+    if (isSubmitSuccessful) {
       reset({
         favouriteDestination: "",
         totalDays: "",
         budget: "",
         travellers: "",
       });
+      setSending(false);
+    }
   }, [reset, isSubmitSuccessful]);
   return (
     <div className="sm:px-10 md:px-32 lg:px-56 px-5 mt-10">
@@ -98,11 +114,12 @@ function CreateTrip() {
               </span>
             )}
           </div>
-
+          <HeaderSeperatorImg />
           <div>
             <h2 className=" text-xl my-3 font-medium text-orange-600">
               👉 What is your budget?
             </h2>
+            <p className="text-sm text-gray-500">Select one of the option</p>
             {errors?.budget && (
               <div className="flex items-center gap-5">
                 <span className="font-medium text-gray-600">
@@ -144,11 +161,12 @@ function CreateTrip() {
               )}
             />
           </div>
-
+          <HeaderSeperatorImg />
           <div>
             <h2 className="text-xl my-3 font-medium text-orange-600">
               👉 Where do you plane to travel with whom?
             </h2>
+            <p className="text-sm text-gray-500">Select one of the option</p>
             {errors?.travellers && (
               <div className="flex items-center gap-5">
                 <span className="font-medium text-gray-600">
@@ -191,8 +209,23 @@ function CreateTrip() {
         </div>
         <div className="divide-x-0 border border-opacity-10 my-10"></div>
         <div className="my-10 flex justify-end ">
-          <Button className="mt-" type="submit">
-            Generate Trip
+          <Button className="mt-" type="submit" disabled={isSending}>
+            {!isSending ? (
+              "Generate Trip"
+            ) : (
+              <div className="flex items-center">
+                <svg
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  className="mr-2 animate-spin h-5 w-5"
+                  viewBox="0 0 1792 1792"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path d="M526 1394q0 53-37.5 90.5t-90.5 37.5q-52 0-90-38t-38-90q0-53 37.5-90.5t90.5-37.5 90.5 37.5 37.5 90.5zm498 206q0 53-37.5 90.5t-90.5 37.5-90.5-37.5-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm-704-704q0 53-37.5 90.5t-90.5 37.5-90.5-37.5-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm1202 498q0 52-38 90t-90 38q-53 0-90.5-37.5t-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm-964-996q0 66-47 113t-113 47-113-47-47-113 47-113 113-47 113 47 47 113zm1170 498q0 53-37.5 90.5t-90.5 37.5-90.5-37.5-37.5-90.5 37.5-90.5 90.5-37.5 90.5 37.5 37.5 90.5zm-640-704q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm530 206q0 93-66 158.5t-158 65.5q-93 0-158.5-65.5t-65.5-158.5q0-92 65.5-158t158.5-66q92 0 158 66t66 158z"></path>
+                </svg>
+                <span>Calculating...</span>
+              </div>
+            )}
           </Button>
         </div>
       </form>
