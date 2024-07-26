@@ -82,11 +82,16 @@ function CreateTrip() {
         budget: "",
         travellers: "",
       });
-      setSending(false);
+      // setSending(false);
     }
   }, [reset, isSubmitSuccessful]);
   return (
-    <div className="sm:px-10 md:px-32 lg:px-56 px-5 mt-10">
+    <div className="relative sm:px-10 md:px-32 lg:px-56 px-5 mt-10">
+      <div
+        className={`${
+          isSending &&
+          "animate-pulse bg-slate-50 opacity-15 z-10 absolute h-full w-full left-0 right-0"
+        }`}></div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <h2 className="font-bold text-3xl text-orange-800">
           Describe your ideal travel preferences to us
