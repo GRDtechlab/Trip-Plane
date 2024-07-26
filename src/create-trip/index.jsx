@@ -1,12 +1,14 @@
 import HeaderSeperatorImg from "@/components/custom/Header-Seperator-Img";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import {
   AI_PROMPT,
   SelectBudgetOptions,
   SelectTravelsList,
 } from "@/constants/options";
 import { chatSession } from "@/service/AIModal";
+import { Description } from "@radix-ui/react-toast";
 import React, { useEffect, useState } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 import { useForm, Controller } from "react-hook-form";
@@ -33,6 +35,8 @@ function CreateTrip() {
 
   const navigate = useNavigate();
   const [isSending, setSending] = useState(false);
+  const [error, setError] = useState(false);
+  const { toast } = useToast();
 
   const onSubmit = async (tripFormData) => {
     console.log(!isValid, { tripFormData });
@@ -46,16 +50,27 @@ function CreateTrip() {
       .replace("{travellers}", tripFormData.travellers);
 
     console.log(FINAL_PROMPTS);
-    const result = await chatSession.sendMessage(FINAL_PROMPTS);
+    try {
+      const result = await chatSession.sendMessage(FINAL_PROMPTS);
 
-    console.log(result?.response?.text());
+      console.log(result?.response?.text());
+      setSending(false);
+      navigate(`/view-trip/${tripFormData.favouriteDestination}`, {
+        state: {
+          tripData: JSON.parse(result.response.text()),
+          userSelection: tripFormData,
+        },
+      });
+    } catch (error) {
+      console.log({ error });
+      setError(true);
+      toast({
+        variant: "destructive",
+        titlle: "Something went wrong.",
+        description: "While fetching data error occured. Try Again.",
+      });
+    }
     setSending(false);
-    navigate(`/view-trip/${tripFormData.favouriteDestination}`, {
-      state: {
-        tripData: JSON.parse(result.response.text()),
-        userSelection: tripFormData,
-      },
-    });
   };
 
   useEffect(() => {
