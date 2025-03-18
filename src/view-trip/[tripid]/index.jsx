@@ -8,15 +8,18 @@ import HeaderSeperatorImg from "@/components/custom/Header-Seperator-Img";
 function ViewTrip() {
   const location = useLocation();
   const userTripData = location.state;
+
   return (
     <div className="p-10 md:px-20 lg:px-44 xl:px-56">
       {/* {info Section} */}
+
       <SectionInfo trip={userTripData} />
       <HeaderSeperatorImg />
       {/* {Hotel Section} */}
       <Hotels trip={userTripData} />
       <HeaderSeperatorImg />
       {/* {Places to Visit} */}
+      {console.log({ userTripData })}
       <PlacesToVisit trip={userTripData} />
     </div>
   );
